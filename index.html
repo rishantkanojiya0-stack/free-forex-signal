@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forex Education Dashboard — Learn, Don't Gamble</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0f1419;
+    color: #e6e6e6;
+    line-height: 1.6;
+    padding: 20px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  header {
+    border-bottom: 2px solid #1e2a38;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+  }
+  h1 { font-size: 1.8rem; color: #4fc3f7; margin-bottom: 8px; }
+  .subtitle { color: #8b9ba8; font-size: 0.95rem; }
+  .warning {
+    background: #3d1f1f;
+    border-left: 4px solid #f44336;
+    padding: 16px 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+    font-size: 0.92rem;
+  }
+  .warning strong { color: #ff8a80; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  .card {
+    background: #1a2332;
+    border: 1px solid #2a3a4d;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .card h2 {
+    font-size: 1.1rem;
+    color: #4fc3f7;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 10px 0;
+  }
+  .change { font-size: 0.9rem; }
+  .up { color: #66bb6a; }
+  .down { color: #ef5350; }
+  .indicator-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #2a3a4d;
+    font-size: 0.9rem;
+  }
+  .indicator-row:last-child { border-bottom: none; }
+  .indicator-label { color: #8b9ba8; }
+  .indicator-value { font-weight: 600; }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #2a3a4d;
+    color: #8b9ba8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .tag.oversold { background: #1b3a1f; color: #66bb6a; }
+  .tag.overbought { background: #3d1f1f; color: #ef5350; }
+  .tag.neutral { background: #2a3a4d; color: #8b9ba8; }
+  .explain {
+    font-size: 0.82rem;
+    color: #6b7b88;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #2a3a4d;
+    font-style: italic;
+  }
+  .journal-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  input, select, button {
+    background: #0f1419;
+    border: 1px solid #2a3a4d;
+    color: #e6e6e6;
+    padding: 10px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-family: inherit;
+  }
+  button {
+    background: #4fc3f7;
+    color: #0f1419;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: background 0.2s;
+  }
+  button:hover { background: #29b6f6; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-top: 10px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #2a3a4d;
+  }
+  th { color: #8b9ba8; font-weight: 500; text-transform: uppercase; font-size: 0.75rem; }
+  .empty { color: #6b7b88; font-style: italic; padding: 20px; text-align: center; }
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 2px solid #1e2a38;
+    color: #6b7b88;
+    font-size: 0.82rem;
+  }
+  .status {
+    font-size: 0.75rem;
+    color: #6b7b88;
+    margin-top: 8px;
+  }
+  @media (max-width: 600px) {
+    .journal-form { grid-template-columns: 1fr; }
+    .price { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📊 Forex Education Dashboard</h1>
+    <p class="subtitle">Learn how forex markets and technical indicators work — legally, with real data, without risking money.</p>
+  </header>
+
+  <div class="warning">
+    <strong>⚠️ This is NOT a signal service.</strong> The indicators below describe what has <em>already happened</em> in the market. They do not predict the future and cannot tell you when to buy or sell. Anyone who claims otherwise is misleading you. This tool exists purely to help you understand how technical analysis works. Nothing here is financial advice.
+  </div>
+
+  <div class="grid">
+    <!-- USD/INR Price Card -->
+    <div class="card">
+      <h2>USD / INR <span class="tag" id="data-tag">loading</span></h2>
+      <div class="price" id="usdinr-price">—</div>
+      <div class="change" id="usdinr-change">—</div>
+      <div class="status" id="usdinr-status">Fetching live data…</div>
+    </div>
+
+    <!-- RSI Card -->
+    <div class="card">
+      <h2>RSI (14) <span class="tag" id="rsi-tag">—</span></h2>
+      <div class="price" id="rsi-value">—</div>
+      <div class="explain">
+        RSI measures momentum on a 0–100 scale. Below 30 is often called "oversold"; above 70 "overbought." These are descriptions, not predictions. Markets can stay oversold for weeks.
+      </div>
+    </div>
+
+    <!-- Moving Averages Card -->
+    <div class="card">
+      <h2>Moving Averages</h2>
+      <div class="indicator-row">
+        <span class="indicator-label">SMA 20</span>
+        <span class="indicator-value" id="sma20">—</span>
+      </div>
+      <div class="indicator-row">
+        <span class="indicator-label">SMA 50</span>
+        <span class="indicator-value" id="sma50">—</span>
+      </div>
+      <div class="indicator-row">
+        <span class="indicator-label">Price vs SMA20</span>
+        <span class="indicator-value" id="price-vs-sma">—</span>
+      </div>
+      <div class="explain">
+        A moving average smooths past prices. Price above the average is sometimes called "bullish"; below, "bearish." This is a description of the past, not a forecast.
+      </div>
+    </div>
+
+    <!-- Volatility Card -->
+    <div class="card">
+      <h2>Volatility (Std Dev)</h2>
+      <div class="price" id="volatility">—</div>
+      <div class="explain">
+        Standard deviation of recent price changes. Higher numbers mean the price is swinging more. Volatility is not direction — it doesn't tell you up or down, only how much movement is happening.
+      </div>
+    </div>
+  </div>
+
+  <!-- Journal -->
+  <div class="card">
+    <h2>📓 Demo Trade Journal</h2>
+    <p style="font-size:0.88rem; color:#8b9ba8; margin-bottom:16px;">
+      Practice here. Log hypothetical trades with no real money. The goal is to build discipline and see your own decision patterns — not to "win."
+    </p>
+    <div class="journal-form">
+      <select id="j-pair">
+        <option>USD/INR</option>
+        <option>EUR/INR</option>
+        <option>GBP/INR</option>
+        <option>JPY/INR</option>
+      </select>
+      <select id="j-side">
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
+      <input type="number" id="j-price" placeholder="Entry price" step="0.0001">
+      <button onclick="addTrade()">Log Trade</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Pair</th>
+          <th>Side</th>
+          <th>Entry</th>
+          <th>Reason</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="journal-body">
+        <tr><td colspan="6" class="empty">No trades logged yet. Add one above to start practising.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    <p><strong>Data source:</strong> exchangerate.host (free public API, indicative rates only).</p>
+    <p style="margin-top:8px;"><strong>Legal notice:</strong> In India, only INR-based currency pairs traded through SEBI-registered exchanges are legal for retail forex. Trading on unregulated offshore platforms (Quotex, Olymp Trade, Binomo, etc.) violates FEMA and exposes you to penalties and total loss with no recourse.</p>
+    <p style="margin-top:8px;">If you've lost money to a fraudulent platform, report immediately at <strong>cybercrime.gov.in</strong> or call <strong>1930</strong>. Do not pay anyone who promises to "recover" your funds — that is a secondary scam.</p>
+  </footer>
+
+</div>
+
+<script>
+// ---- Journal logic ----
+function addTrade() {
+  const pair = document.getElementById('j-pair').value;
+  const side = document.getElementById('j-side').value;
+  const price = document.getElementById('j-price').value;
+  if (!price) { alert('Please enter an entry price.'); return; }
+
+  const body = document.getElementById('journal-body');
+  const empty = body.querySelector('.empty');
+  if (empty) empty.parentElement.remove();
+
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td>${new Date().toLocaleTimeString()}</td>
+    <td>${pair}</td>
+    <td class="${side === 'BUY' ? 'up' : 'down'}">${side}</td>
+    <td>${parseFloat(price).toFixed(4)}</td>
+    <td style="color:#6b7b88; font-size:0.8rem;">Practice entry</td>
+    <td><button onclick="this.closest('tr').remove()" style="padding:4px 8px; font-size:0.75rem; background:#3d1f1f; color:#ef5350;">✕</button></td>
+  `;
+  body.appendChild(row);
+  document.getElementById('j-price').value = '';
+}
+
+// ---- Market data + indicators ----
+async function loadData() {
+  const status = document.getElementById('usdinr-status');
+  const tag = document.getElementById('data-tag');
+  try {
+    // Fetch ~90 days of USD/INR history
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - 90);
+    const fmt = d => d.toISOString().split('T')[0];
+
+    const url = `https://api.exchangerate.host/timeseries?start_date=${fmt(start)}&end_date=${fmt(end)}&base=USD&symbols=INR`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    const dates = Object.keys(data.rates).sort();
+    const prices = dates.map(d => data.rates[d].INR).filter(v => v != null);
+
+    if (prices.length < 20) throw new Error('Not enough data');
+
+    const latest = prices[prices.length - 1];
+    const prev = prices[prices.length - 2];
+    const change = latest - prev;
+    const changePct = (change / prev) * 100;
+
+    document.getElementById('usdinr-price').textContent = latest.toFixed(4);
+    const changeEl = document.getElementById('usdinr-change');
+    changeEl.textContent = `${change >= 0 ? '▲' : '▼'} ${change.toFixed(4)} (${changePct.toFixed(2)}%) vs yesterday`;
+    changeEl.className = 'change ' + (change >= 0 ? 'up' : 'down');
+    status.textContent = `Latest data point: ${dates[dates.length - 1]}`;
+    tag.textContent = 'live';
+    tag.style.background = '#1b3a1f';
+    tag.style.color = '#66bb6a';
+
+    // RSI (14)
+    const rsi = computeRSI(prices, 14);
+    const rsiEl = document.getElementById('rsi-value');
+    const rsiTag = document.getElementById('rsi-tag');
+    rsiEl.textContent = rsi.toFixed(2);
+    if (rsi < 30) { rsiTag.textContent = 'oversold'; rsiTag.className = 'tag oversold'; }
+    else if (rsi > 70) { rsiTag.textContent = 'overbought'; rsiTag.className = 'tag overbought'; }
+    else { rsiTag.textContent = 'neutral'; rsiTag.className = 'tag neutral'; }
+
+    // SMAs
+    const sma20 = avg(prices.slice(-20));
+    const sma50 = prices.length >= 50 ? avg(prices.slice(-50)) : null;
+    document.getElementById('sma20').textContent = sma20.toFixed(4);
+    document.getElementById('sma50').textContent = sma50 ? sma50.toFixed(4) : '—';
+    const vs = latest > sma20 ? 'above (bullish bias)' : 'below (bearish bias)';
+    const vsEl = document.getElementById('price-vs-sma');
+    vsEl.textContent = vs;
+    vsEl.className = 'indicator-value ' + (latest > sma20 ? 'up' : 'down');
+
+    // Volatility
+    const returns = [];
+    for (let i = 1; i < prices.length; i++) returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+    const vol = stddev(returns) * 100;
+    document.getElementById('volatility').textContent = vol.toFixed(3) + '%';
+
+  } catch (err) {
+    status.textContent = 'Could not load live data (API may be rate-limited or blocked). Indicators will use sample data so you can still see how they work.';
+    tag.textContent = 'sample';
+    tag.style.background = '#3d2a1f';
+    tag.style.color = '#ffb74d';
+    useSampleData();
+  }
+}
+
+function useSampleData() {
+  // Deterministic sample so the UI still demonstrates how indicators behave
+  const prices = [];
+  let p = 83.0;
+  for (let i = 0; i < 90; i++) { p += (Math.sin(i/7) * 0.08) + (Math.random() - 0.5) * 0.15; prices.push(p); }
+  const latest = prices[prices.length - 1];
+  const prev = prices[prices.length - 2];
+  const change = latest - prev;
+  document.getElementById('usdinr-price').textContent = latest.toFixed(4);
+  const changeEl = document.getElementById('usdinr-change');
+  changeEl.textContent = `${change >= 0 ? '▲' : '▼'} ${change.toFixed(4)} (sample)`;
+  changeEl.className = 'change ' + (change >= 0 ? 'up' : 'down');
+
+  const rsi = computeRSI(prices, 14);
+  document.getElementById('rsi-value').textContent = rsi.toFixed(2);
+  const rsiTag = document.getElementById('rsi-tag');
+  if (rsi < 30) { rsiTag.textContent = 'oversold'; rsiTag.className = 'tag oversold'; }
+  else if (rsi > 70) { rsiTag.textContent = 'overbought'; rsiTag.className = 'tag overbought'; }
+  else { rsiTag.textContent = 'neutral'; rsiTag.className = 'tag neutral'; }
+
+  const sma20 = avg(prices.slice(-20));
+  const sma50 = avg(prices.slice(-50));
+  document.getElementById('sma20').textContent = sma20.toFixed(4);
+  document.getElementById('sma50').textContent = sma50.toFixed(4);
+  const vsEl = document.getElementById('price-vs-sma');
+  vsEl.textContent = latest > sma20 ? 'above (bullish bias)' : 'below (bearish bias)';
+  vsEl.className = 'indicator-value ' + (latest > sma20 ? 'up' : 'down');
+
+  const returns = [];
+  for (let i = 1; i < prices.length; i++) returns.push((prices[i] - prices[i-1]) / prices[i-1]);
+  document.getElementById('volatility').textContent = (stddev(returns) * 100).toFixed(3) + '%';
+}
+
+function avg(arr) { return arr.reduce((a,b) => a+b, 0) / arr.length; }
+function stddev(arr) {
+  const m = avg(arr);
+  return Math.sqrt(avg(arr.map(x => (x-m)**2)));
+}
+function computeRSI(prices, period) {
+  if (prices.length < period + 1) return 50;
+  let gains = 0, losses = 0;
+  for (let i = prices.length - period; i < prices.length; i++) {
+    const diff = prices[i] - prices[i-1];
+    if (diff >= 0) gains += diff; else losses -= diff;
+  }
+  const rs = losses === 0 ? 100 : (gains / period) / (losses / period);
+  return 100 - (100 / (1 + rs));
+}
+
+loadData();
+</script>
+</body>
+</html>
